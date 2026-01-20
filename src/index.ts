@@ -7,3 +7,7 @@
 
 export * from './types';
 export * from './UnitConverter';
+export * from './converters/ComputerCapacityConverter';
+export * from './converters/PowerCapacityConverter';
+export * from './converters/PowerUsageConverter';
+export * from './converters/DistanceConverter';

@@ -2,7 +2,7 @@
  * @file UnitConverter.ts
  * @author 김영찬
  * @since 2026-01-20
- * @description 단위 변환 기능 및 최적 단위 표시 기능을 제공하는 메인 클래스입니다.
+ * @description 단위 변환 기능 및 최적 단위 표시 기능을 제공하는 메인 클래스입니다. (상대적 배수 로직 적용)
  */
 
 import { UnitDefinition, ComplexValueInput } from './types';
@@ -15,34 +15,39 @@ export class UnitConverter {
 
     /**
      * 생성자
-     * @description 기본 컴퓨터 용량 단위(Byte, KB, MB, GB, TB, PB)를 초기화합니다.
+     * @description 빈 단위 목록으로 초기화합니다.
      */
     constructor() {
-        this.registerDefaultUnits();
-    }
-
-    /**
-     * 기본 컴퓨터 용량 단위 등록
-     */
-    private registerDefaultUnits(): void {
-        this.units = [
-            { unit: 'Byte', unitValue: 1 },
-            { unit: 'KB', unitValue: 1024 },
-            { unit: 'MB', unitValue: 1024 * 1024 },
-            { unit: 'GB', unitValue: 1024 * 1024 * 1024 },
-            { unit: 'TB', unitValue: 1024 * 1024 * 1024 * 1024 },
-            { unit: 'PB', unitValue: 1024 * 1024 * 1024 * 1024 * 1024 }
-        ];
+        // 기본 단위 없음 (서브 클래스 또는 registerUnit으로 등록)
     }
 
     /**
      * 단위 등록 (Rule 5)
-     * @param units 단위 정의 목록
+     * @param units 단위 정의 목록 (기존 단위 목록 뒤에 추가됨)
      */
     public registerUnit(units: UnitDefinition[]): void {
         this.units = [...this.units, ...units];
-        // unitValue 기준으로 오름차순 정렬 (계산 편의성)
-        this.units.sort((a, b) => a.unitValue - b.unitValue);
+        // 정렬하지 않음 (순서가 계산 로직에 중요함)
+    }
+
+    /**
+     * 단위 목록을 절대 값(Base 기준)으로 변환하여 반환
+     */
+    private getAbsoluteUnits(units: UnitDefinition[]): UnitDefinition[] {
+        let currentMultiplier = 1;
+        
+        return units.map((u, index) => {
+            if (index === 0) {
+                currentMultiplier = u.unitValue;
+            } else {
+                currentMultiplier *= u.unitValue;
+            }
+            
+            return {
+                unit: u.unit,
+                unitValue: currentMultiplier
+            };
+        });
     }
 
     /**
@@ -53,16 +58,14 @@ export class UnitConverter {
      * @returns 변환된 값
      */
     public convertTo(value: number, fromUnit: string, toUnit: string): number {
-        const fromDef = this.findUnit(fromUnit);
-        const toDef = this.findUnit(toUnit);
+        const absoluteUnits = this.getAbsoluteUnits(this.units);
+        const fromDef = absoluteUnits.find(u => u.unit === fromUnit);
+        const toDef = absoluteUnits.find(u => u.unit === toUnit);
 
         if (!fromDef || !toDef) {
             throw new Error(`Unit not found: ${!fromDef ? fromUnit : toUnit}`);
         }
 
-        // 기본 단위 값으로 변환 후 목표 단위로 변환
-        // 예: 1 KB (1024) -> MB (1024*1024)
-        // 1 * 1024 / (1024*1024) = 0.0009765625
         const baseValue = value * fromDef.unitValue;
         return baseValue / toDef.unitValue;
     }
@@ -77,59 +80,43 @@ export class UnitConverter {
     public formatBest(input: ComplexValueInput): string;
     public formatBest(input: number | ComplexValueInput, fixedUnits?: UnitDefinition[]): string {
         let value: number;
-        let unitDefs: UnitDefinition[];
+        let originalUnitDefs: UnitDefinition[];
 
         if (typeof input === 'object' && 'unit' in input) {
-            // Rule 2 Case
-            // 입력값은 기본 단위(unitValue:1 또는 가장 작은 단위) 기준이라고 가정하거나,
-            // 아니면 입력 구조에 대한 명확한 정의가 필요함.
-            // 여기서는 입력된 value가 제공된 unit[0] (혹은 unitValue=1)이 아니라,
-            // 제공된 unit 리스트를 '사용할 단위 체계'로 보고, 
-            // value는 그 체계의 가장 작은 단위(혹은 기준 값)라고 가정함.
-            // *주의*: 요구사항의 예시가 모호하므로, 값은 Base Unit 기준이라고 가정.
             value = input.value;
-            unitDefs = input.unit;
-            // 정렬
-            unitDefs.sort((a, b) => a.unitValue - b.unitValue);
+            originalUnitDefs = input.unit;
         } else {
             value = input;
-            unitDefs = fixedUnits || this.units;
+            originalUnitDefs = fixedUnits || this.units;
         }
 
-        if (unitDefs.length === 0) return `${value}`;
+        if (originalUnitDefs.length === 0) return `${value}`;
 
-        // 가장 큰 단위부터 확인하여 값이 >= 1 인지 확인 (혹은 가장 적절한 단위)
-        // 오름차순 정렬되어 있다고 가정
-        // 예: 1000 Byte -> Byte (1000 >= 1)
-        // 1024 Byte -> KB (1024 >= 1024) => 1 KB
-        
-        // 뒤(큰 단위)에서부터 탐색
-        for (let i = unitDefs.length - 1; i >= 0; i--) {
-            const unit = unitDefs[i];
-            if (value >= unit.unitValue) {
+        // 절대 값으로 변환하여 계산
+        const absoluteUnits = this.getAbsoluteUnits(originalUnitDefs);
+
+        // 가장 큰 단위부터 확인
+        for (let i = absoluteUnits.length - 1; i >= 0; i--) {
+            const unit = absoluteUnits[i];
+            
+            // 값이 해당 단위의 '단위 값'보다 크거나 같으면 사용
+            // 단, 절대값 기준
+            if (Math.abs(value) >= unit.unitValue) {
                 const converted = value / unit.unitValue;
-                // 정수로 딱 떨어지거나, 소수점 2자리까지 표시
                 const formatted = Number.isInteger(converted) ? converted : converted.toFixed(2);
                 return `${formatted} ${unit.unit}`;
             }
         }
 
-        // 가장 작은 단위보다도 작을 경우, 가장 작은 단위로 표시
-        const smallest = unitDefs[0];
+        // 가장 작은 단위보다도 작을 경우 (가장 작은 단위로 표시)
+        const smallest = absoluteUnits[0];
         const converted = value / smallest.unitValue;
         const formatted = Number.isInteger(converted) ? converted : converted.toFixed(2);
         return `${formatted} ${smallest.unit}`;
     }
 
     /**
-     * 단위 정의 검색
-     */
-    private findUnit(unitName: string): UnitDefinition | undefined {
-        return this.units.find(u => u.unit === unitName);
-    }
-    
-    /**
-     * 현재 등록된 단위 목록 반환
+     * 현재 등록된 단위 목록 반환 (원본, 상대적 값 포함)
      */
     public getUnits(): UnitDefinition[] {
         return this.units;

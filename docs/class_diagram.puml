@@ -6,7 +6,7 @@ skinparam classAttributeIconSize 0
 ' 인터페이스 정의
 interface UnitDefinition {
     + unit: string
-    + unitValue: number
+    + unitValue: number (Relative)
 }
 
 interface ComplexValueInput {
@@ -19,25 +19,50 @@ class UnitConverter {
     - units: UnitDefinition[]
     
     + constructor()
-    - registerDefaultUnits(): void
     + registerUnit(units: UnitDefinition[]): void
+    - getAbsoluteUnits(units: UnitDefinition[]): UnitDefinition[]
     + convertTo(value: number, fromUnit: string, toUnit: string): number
-    + formatBest(input: number, fixedUnits?: UnitDefinition[]): string
-    + formatBest(input: ComplexValueInput): string
-    - findUnit(unitName: string): UnitDefinition | undefined
+    + formatBest(input: number | ComplexValueInput, fixedUnits?: UnitDefinition[]): string
     + getUnits(): UnitDefinition[]
 }
 
-' 관계 정의
+class ComputerCapacityConverter {
+    + constructor()
+}
+
+class PowerCapacityConverter {
+    + constructor()
+}
+
+class PowerUsageConverter {
+    + constructor()
+}
+
+class DistanceConverter {
+    + constructor()
+}
+
+' 상속 및 관계 정의
+UnitConverter <|-- ComputerCapacityConverter
+UnitConverter <|-- PowerCapacityConverter
+UnitConverter <|-- PowerUsageConverter
+UnitConverter <|-- DistanceConverter
+
 UnitConverter ..> UnitDefinition : 사용
 UnitConverter ..> ComplexValueInput : 사용
-ComplexValueInput "1" *-- "many" UnitDefinition : 포함
 
-note bottom of UnitConverter
+note right of UnitConverter
   <b>UnitConverter</b>
-  - 기본 단위(컴퓨터 용량)를 포함하여 초기화됨
-  - 사용자 정의 단위 등록 가능
-  - 값 변환 및 최적 단위 포맷팅 기능 제공
+  - 단위 변환 로직의 Base Class
+  - 상대적 배수(Relative Step) 로직 사용
+end note
+
+note bottom of DistanceConverter
+  <b>Example</b>
+  - mm (1)
+  - cm (10)
+  - m (100)
+  - km (1000)
 end note
 
 @enduml

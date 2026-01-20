@@ -16,7 +16,7 @@ export interface UnitDefinition {
     unit: string;
 
     /**
-     * 단위 값 (기준 단위 대비 배수)
+     * 단위 값 (이전 단위 기준 배수, 첫 번째 단위는 절대 값)
      */
     unitValue: number;
 }
