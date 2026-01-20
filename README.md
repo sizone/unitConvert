@@ -6,7 +6,7 @@ TypeScript 기반의 강력하고 유연한 단위 변환 라이브러리입니�
 ## 설치 (Installation)
 
 ```bash
-npm install unitconvert
+npm install unitmaster
 ```
 
 ## 주요 기능 (Features)
@@ -24,7 +24,7 @@ npm install unitconvert
 Byte, KB, MB, GB, TB, PB, EB, ZB, YB 등을 지원합니다. (1024 배수 기준)
 
 ```typescript
-import { ComputerCapacityConverter } from 'unitconvert';
+import { ComputerCapacityConverter } from 'unitmaster';
 
 const converter = new ComputerCapacityConverter();
 
@@ -36,8 +36,8 @@ console.log(converter.convertTo(1024, 'Byte', 'KB')); // 1
 console.log(converter.convertTo(1, 'MB', 'Byte')); // 1048576
 
 // 2. 최적 단위 자동 포맷팅
-console.log(converter.formatBest(1048576)); // "1 MB"
-console.log(converter.formatBest(2048));    // "2 KB"
+console.log(converter.formatBest(1048576)); // { value: 1, unit: 'MB' }
+console.log(converter.formatBest(2048));    // { value: 2, unit: 'KB' }
 ```
 
 ### 2. 거리 변환 (Distance)
@@ -45,7 +45,7 @@ console.log(converter.formatBest(2048));    // "2 KB"
 mm, cm(10), m(100), km(1000) 단위를 지원합니다.
 
 ```typescript
-import { DistanceConverter } from 'unitconvert';
+import { DistanceConverter } from 'unitmaster';
 
 const distConverter = new DistanceConverter();
 
@@ -53,7 +53,8 @@ const distConverter = new DistanceConverter();
 console.log(distConverter.convertTo(1, 'km', 'm')); // 1000
 
 // 100 cm -> 1 m
-console.log(distConverter.formatBest(100, undefined)); // "10 cm" 가 아니라 최적 단위인 "1 m"로 변환 (로직에 따라 다름)
+// 100 cm -> 1 m
+console.log(distConverter.formatBest(100, undefined)); // { value: 1, unit: 'm' }
 // formatBest는 값이 1 이상이 되는 가장 큰 단위를 찾습니다.
 ```
 
@@ -63,10 +64,10 @@ console.log(distConverter.formatBest(100, undefined)); // "10 cm" 가 아니라 
 - **PowerUsageConverter**: Wh, kWh, MWh, GWh, TWh (1000 배수)
 
 ```typescript
-import { PowerCapacityConverter } from 'unitconvert';
+import { PowerCapacityConverter } from 'unitmaster';
 
 const powerConverter = new PowerCapacityConverter();
-console.log(powerConverter.formatBest(1500)); // "1.5 kW" (기본 단위 W 기준)
+console.log(powerConverter.formatBest(1500)); // { value: 1.5, unit: 'kW' } (기본 단위 W 기준)
 ```
 
 ## 고급 사용법 (Advanced)
@@ -86,7 +87,7 @@ converter.registerUnit([{ unit: 'BB', unitValue: 1024 }]);
 `UnitConverter`를 상속받아 새로운 도메인의 변환기를 만들 수 있습니다.
 
 ```typescript
-import { UnitConverter } from 'unitconvert';
+import { UnitConverter } from 'unitmaster';
 
 class TimeConverter extends UnitConverter {
     constructor() {
@@ -101,7 +102,7 @@ class TimeConverter extends UnitConverter {
 }
 
 const timeConverter = new TimeConverter();
-console.log(timeConverter.formatBest(3600)); // "1 Hour"
+console.log(timeConverter.formatBest(3600)); // { value: 1, unit: 'Hour' }
 ```
 
 ### 복합 입력값 처리

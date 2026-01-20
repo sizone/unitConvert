@@ -1,7 +1,7 @@
 {
-  "name": "unitconvert",
+  "name": "unitmaster",
   "version": "1.0.0",
-  "description": "TypeScript Unit Converter Library",
+  "description": "Unit Converter Library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -13,8 +13,7 @@
   },
   "keywords": [
     "unit",
-    "converter",
-    "typescript"
+    "converter"
   ],
   "author": "김영찬",
   "license": "MIT",
