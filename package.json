@@ -1,0 +1,30 @@
+{
+  "name": "unitconvert",
+  "version": "1.0.0",
+  "description": "TypeScript Unit Converter Library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha -r ts-node/register test/**/*.test.ts"
+  },
+  "keywords": [
+    "unit",
+    "converter",
+    "typescript"
+  ],
+  "author": "김영찬",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.5",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

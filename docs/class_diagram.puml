@@ -1,0 +1,43 @@
+@startuml
+' 설정
+title 단위 변환기 (UnitConverter) 클래스 다이어그램
+skinparam classAttributeIconSize 0
+
+' 인터페이스 정의
+interface UnitDefinition {
+    + unit: string
+    + unitValue: number
+}
+
+interface ComplexValueInput {
+    + value: number
+    + unit: UnitDefinition[]
+}
+
+' 클래스 정의
+class UnitConverter {
+    - units: UnitDefinition[]
+    
+    + constructor()
+    - registerDefaultUnits(): void
+    + registerUnit(units: UnitDefinition[]): void
+    + convertTo(value: number, fromUnit: string, toUnit: string): number
+    + formatBest(input: number, fixedUnits?: UnitDefinition[]): string
+    + formatBest(input: ComplexValueInput): string
+    - findUnit(unitName: string): UnitDefinition | undefined
+    + getUnits(): UnitDefinition[]
+}
+
+' 관계 정의
+UnitConverter ..> UnitDefinition : 사용
+UnitConverter ..> ComplexValueInput : 사용
+ComplexValueInput "1" *-- "many" UnitDefinition : 포함
+
+note bottom of UnitConverter
+  <b>UnitConverter</b>
+  - 기본 단위(컴퓨터 용량)를 포함하여 초기화됨
+  - 사용자 정의 단위 등록 가능
+  - 값 변환 및 최적 단위 포맷팅 기능 제공
+end note
+
+@enduml
