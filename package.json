@@ -17,7 +17,7 @@
     "typescript"
   ],
   "author": "김영찬",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.6",

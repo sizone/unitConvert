@@ -122,4 +122,4 @@ const complexInput = {
 
 ## 라이선스
 
-ISC
+MIT
