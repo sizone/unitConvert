@@ -5,7 +5,7 @@
  * @description 단위 변환 기능 및 최적 단위 표시 기능을 제공하는 메인 클래스입니다. (상대적 배수 로직 적용)
  */
 
-import { UnitDefinition, ComplexValueInput } from './types';
+import { UnitDefinition, ComplexValueInput, UnitOutput } from './types';
 
 /**
  * 단위 변환기 클래스
@@ -74,11 +74,11 @@ export class UnitConverter {
      * 입력 값을 받아 최적의 단위로 변환 (Rule 1, Rule 2, Rule 3)
      * @param input 복합 입력 값 ({value, unit[]}) 또는 단순 값
      * @param fixedUnits 사용할 단위 목록 (없으면 등록된 단위 사용)
-     * @returns 변환된 문자열 (예: "100 MB")
+     * @returns 변환된 결과 객체 { value, unit }
      */
-    public formatBest(input: number, fixedUnits?: UnitDefinition[]): string;
-    public formatBest(input: ComplexValueInput): string;
-    public formatBest(input: number | ComplexValueInput, fixedUnits?: UnitDefinition[]): string {
+    public formatBest(input: number, fixedUnits?: UnitDefinition[]): UnitOutput;
+    public formatBest(input: ComplexValueInput): UnitOutput;
+    public formatBest(input: number | ComplexValueInput, fixedUnits?: UnitDefinition[]): UnitOutput {
         let value: number;
         let originalUnitDefs: UnitDefinition[];
 
@@ -90,7 +90,9 @@ export class UnitConverter {
             originalUnitDefs = fixedUnits || this.units;
         }
 
-        if (originalUnitDefs.length === 0) return `${value}`;
+        if (originalUnitDefs.length === 0) {
+            return { value, unit: '' };
+        }
 
         // 절대 값으로 변환하여 계산
         const absoluteUnits = this.getAbsoluteUnits(originalUnitDefs);
@@ -103,16 +105,22 @@ export class UnitConverter {
             // 단, 절대값 기준
             if (Math.abs(value) >= unit.unitValue) {
                 const converted = value / unit.unitValue;
-                const formatted = Number.isInteger(converted) ? converted : converted.toFixed(2);
-                return `${formatted} ${unit.unit}`;
+                const formattedValue = Number.isInteger(converted) 
+                    ? converted 
+                    : parseFloat(converted.toFixed(2));
+                
+                return { value: formattedValue, unit: unit.unit };
             }
         }
 
         // 가장 작은 단위보다도 작을 경우 (가장 작은 단위로 표시)
         const smallest = absoluteUnits[0];
         const converted = value / smallest.unitValue;
-        const formatted = Number.isInteger(converted) ? converted : converted.toFixed(2);
-        return `${formatted} ${smallest.unit}`;
+        const formattedValue = Number.isInteger(converted) 
+            ? converted 
+            : parseFloat(converted.toFixed(2));
+            
+        return { value: formattedValue, unit: smallest.unit };
     }
 
     /**

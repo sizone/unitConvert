@@ -36,3 +36,19 @@ export interface ComplexValueInput {
      */
     unit: UnitDefinition[];
 }
+
+/**
+ * 단위 변환 출력 구조
+ * @interface UnitOutput
+ */
+export interface UnitOutput {
+    /**
+     * 변환된 값
+     */
+    value: number;
+
+    /**
+     * 단위 명칭
+     */
+    unit: string;
+}
