@@ -9,8 +9,7 @@
   ],
   "scripts": {
     "build": "npm version minor && tsc",
-    "test": "mocha -r ts-node/register test/**/*.test.ts",
-    "publish": "npm version minor && npm publish"
+    "test": "mocha -r ts-node/register test/**/*.test.ts"
   },
   "keywords": [
     "unit",
